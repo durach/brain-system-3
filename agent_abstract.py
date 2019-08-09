@@ -1,3 +1,4 @@
+import abc
 import configparser
 import const
 import os
@@ -14,7 +15,7 @@ class Configuration:
         self.cp = configparser.ConfigParser()
 
 
-class Agent:
+class Agent(abc.ABC):
 
     conf = None
     app = False
@@ -42,3 +43,4 @@ class Agent:
 
     def quit(self):
         pass
+

@@ -1,17 +1,19 @@
-import time
-import math
-import pygame.locals
-import pq_gui
+import agent_abstract
 import const
+import math
 import mid_text
+import time
+import pq_gui
+import pygame.locals
+from typing import List
 
 
 class App(pq_gui.pqApp):
 
     timer_value = 0
     system_status = const.STATUS_WAITING
-    snd_10sec_played = False
-    agent_list = False
+    snd_10sec_played: bool = False
+    agent_list: List[agent_abstract.Agent] = False
     btn_reset = None
     btn_start60 = None
     btn_start20 = None
@@ -25,7 +27,7 @@ class App(pq_gui.pqApp):
     timer_target_value = None
     timestamp_start_value = None
 
-    def main(self, agent_list):
+    def main(self, agent_list: List[agent_abstract.Agent]):
 
         # Agent
         self.agent_list = agent_list
@@ -34,6 +36,7 @@ class App(pq_gui.pqApp):
 
         # GUI
         self.draw_gui()
+
         self.update_timer_label()
 
         # Events
@@ -107,23 +110,28 @@ class App(pq_gui.pqApp):
             self.lamp_start_on()
 
     def start_timer(self):
-        pygame.time.set_timer(const.DBRAIN_TIMER_EVENT, 5)
+        self.log("Start Timer")
+        self.pygame_set_timer()
         self.lb_status.settext(const.MSG[const.MSG_STARTED] % self.timer_target_value)
 
     def stop_timer(self):
-        pygame.time.set_timer(const.DBRAIN_TIMER_EVENT, 0)
+        self.log("Stop Timer")
+        self.pygame_reset_timer()
 
     def reset_timer(self):
-        pygame.time.set_timer(const.DBRAIN_TIMER_EVENT, 0)
+        self.log("Reset Timer")
+        self.pygame_reset_timer()
         self.timer_value = 0
         self.update_timer_label()
 
     def finalize_timer(self):
-        pygame.time.set_timer(const.DBRAIN_TIMER_EVENT, 0)
+        self.log("Finalize Timer")
+        self.pygame_reset_timer()
         self.timer_value = self.timer_target_value
         self.update_timer_label()
 
     def do_timer_tick(self, e):
+        self.log("Tick")
         if self.system_status == const.STATUS_WAITING:  # Sometimes timer can do one tick after reset_timer
             return
 
@@ -143,7 +151,7 @@ class App(pq_gui.pqApp):
 
     def exit(self, event=None):
         # print("Before quit")
-        
+
         for agent in self.agent_list:
             agent.all_lamps_off()
             agent.quit()
@@ -180,10 +188,10 @@ class App(pq_gui.pqApp):
 
     def process_false_start(self, table_no):
         self.lb_status.style[const.BG_COLOR] = const.COLOR_BLUE
-        self.lb_status.settext(const.MSG[const.MSG_FALSESTART] % (table_no))
+        self.lb_status.settext(const.MSG[const.MSG_FALSE_START] % (table_no))
         self.system_status = const.STATUS_STOPPED
-        self.play_falsestart(table_no)
-        self.lamp_falsestart_on()
+        self.play_false_start(table_no)
+        self.lamp_false_start_on()
         self.lamp_table_on(table_no)
 
     # Sounds
@@ -191,7 +199,7 @@ class App(pq_gui.pqApp):
     def play_start(self):
         self.snd_start.play()
 
-    def play_falsestart(self, table_no):
+    def play_false_start(self, table_no):
         self.snd_false_start.play()
 
     def play_win(self, table_no):
@@ -209,7 +217,7 @@ class App(pq_gui.pqApp):
         for agent in self.agent_list:
             agent.lamp_start_on()
 
-    def lamp_falsestart_on(self):
+    def lamp_false_start_on(self):
         for agent in self.agent_list:
             agent.lamp_false_start_on()
 
@@ -220,3 +228,12 @@ class App(pq_gui.pqApp):
     def all_lamps_off(self):
         for agent in self.agent_list:
             agent.all_lamps_off()
+
+    def log(self, message):
+        print("{}: {}".format(time.time(), message))
+
+    def pygame_set_timer(self):
+        pygame.time.set_timer(const.DBRAIN_TIMER_EVENT, 1000)
+
+    def pygame_reset_timer(self):
+        pygame.time.set_timer(const.DBRAIN_TIMER_EVENT, 0)

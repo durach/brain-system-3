@@ -42,7 +42,7 @@ class Agent(agent_abstract.Agent):
         self.init_joysticks()
 
     def init_configuration(self):
-        self.conf = agent_abstract.Configuration()
+        self.conf = Configuration()
 
     def init_joysticks(self):
         joysticks = []
